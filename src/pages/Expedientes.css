@@ -1,0 +1,73 @@
+
+.contenedor-expedientes {
+  max-width: 1100px;
+  margin: 30px auto;
+  padding: 20px;
+}
+
+.contenedor-expedientes h1,
+.contenedor-expedientes h2 {
+  color: #b83275;
+}
+
+.contenedor-expedientes form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: white;
+  padding: 25px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.contenedor-expedientes label {
+  font-weight: bold;
+  color: #8f285c;
+}
+
+.contenedor-expedientes input,
+.contenedor-expedientes textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid #e5b5cc;
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+.contenedor-expedientes button {
+  background-color: #d65791;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.contenedor-expedientes button:hover {
+  background-color: #b83275;
+}
+
+.contenedor-expedientes table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+}
+
+.contenedor-expedientes th {
+  background-color: #d65791;
+  color: white;
+  padding: 12px;
+  text-align: left;
+}
+
+.contenedor-expedientes td {
+  padding: 12px;
+  border-bottom: 1px solid #f0d2df;
+}
+
+.contenedor-expedientes tr:hover {
+  background-color: #fff0f6;
+}
