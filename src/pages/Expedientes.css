@@ -71,3 +71,29 @@
 .contenedor-expedientes tr:hover {
   background-color: #fff0f6;
 }
+
+/* Tabla adaptable a diferentes pantallas */
+.tabla-expedientes {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Botones de acciones */
+.acciones-expediente {
+  display: flex;
+  gap: 8px;
+}
+
+.acciones-expediente button {
+  padding: 8px 12px;
+  white-space: nowrap;
+}
+
+/* Botón para eliminar */
+.contenedor-expedientes .boton-eliminar {
+  background-color: #b63b55;
+}
+
+.contenedor-expedientes .boton-eliminar:hover {
+  background-color: #922b42;
+}
