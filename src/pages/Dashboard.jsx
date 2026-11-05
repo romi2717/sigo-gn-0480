@@ -1,5 +1,4 @@
 
-
 import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
@@ -23,6 +22,12 @@ function Dashboard() {
       <p>Usuario: {usuario?.usuario}</p>
 
       <p>Rol: {usuario?.rol}</p>
+
+      <button
+        onClick={() => navigate("/expedientes")}
+      >
+        Ver expedientes
+      </button>
 
       <button onClick={cerrarSesion}>
         Cerrar sesión
