@@ -1,99 +1,264 @@
 
+/* Contenedor principal */
 .contenedor-expedientes {
-  max-width: 1100px;
-  margin: 30px auto;
-  padding: 20px;
+  padding: 30px;
+  max-width: 1250px;
+  margin: 0 auto;
+  color: #4b2940;
 }
 
-.contenedor-expedientes h1,
+.contenedor-expedientes h1 {
+  color: #b73577;
+  margin-bottom: 10px;
+}
+
 .contenedor-expedientes h2 {
-  color: #b83275;
+  color: #b73577;
+  margin-top: 30px;
+  margin-bottom: 20px;
 }
 
-.contenedor-expedientes form {
+/* Formulario */
+.formulario-expedientes {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  background-color: white;
+  gap: 12px;
+  background-color: #fff2f8;
   padding: 25px;
+  border: 1px solid #f0c5d9;
   border-radius: 12px;
-  margin-bottom: 30px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
 }
 
-.contenedor-expedientes label {
+.formulario-expedientes label {
   font-weight: bold;
-  color: #8f285c;
+  color: #82385c;
 }
 
-.contenedor-expedientes input,
-.contenedor-expedientes textarea {
+.formulario-expedientes input,
+.formulario-expedientes textarea,
+.formulario-expedientes select {
   width: 100%;
-  box-sizing: border-box;
-  padding: 10px;
+  padding: 12px;
   border: 1px solid #e5b5cc;
-  border-radius: 6px;
-  font-size: 15px;
+  border-radius: 8px;
+  background-color: white;
+  font-size: 14px;
+  box-sizing: border-box;
 }
 
-.contenedor-expedientes button {
-  background-color: #d65791;
-  color: white;
+.formulario-expedientes textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.formulario-expedientes input:focus,
+.formulario-expedientes textarea:focus,
+.formulario-expedientes select:focus {
+  outline: none;
+  border-color: #d65791;
+}
+
+/* Botones del formulario */
+.botones-formulario {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.boton-guardar,
+.boton-cancelar,
+.boton-editar,
+.boton-eliminar {
+  padding: 10px 16px;
   border: none;
-  padding: 12px;
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
 }
 
-.contenedor-expedientes button:hover {
-  background-color: #b83275;
-}
-
-.contenedor-expedientes table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: white;
-}
-
-.contenedor-expedientes th {
+.boton-guardar {
   background-color: #d65791;
   color: white;
+}
+
+.boton-cancelar {
+  background-color: #e7d4de;
+  color: #633b50;
+}
+
+.boton-editar {
+  background-color: #f3b9d5;
+  color: #69334d;
+}
+
+.boton-eliminar {
+  background-color: #e36b87;
+  color: white;
+}
+
+/* Buscador */
+.buscador-expedientes {
+  width: 100%;
   padding: 12px;
-  text-align: left;
+  margin-bottom: 20px;
+  border: 1px solid #e5b5cc;
+  border-radius: 8px;
+  font-size: 15px;
+  background-color: white;
+  box-sizing: border-box;
 }
 
-.contenedor-expedientes td {
+.buscador-expedientes:focus {
+  outline: none;
+  border-color: #d65791;
+}
+
+/* Filtros */
+.filtros-expedientes {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filtros-expedientes select {
   padding: 12px;
-  border-bottom: 1px solid #f0d2df;
+  border: 1px solid #e5b5cc;
+  border-radius: 8px;
+  background-color: white;
+  font-size: 14px;
+  min-width: 180px;
 }
 
-.contenedor-expedientes tr:hover {
-  background-color: #fff0f6;
-}
-
-/* Tabla adaptable a diferentes pantallas */
+/* Tabla */
 .tabla-expedientes {
   width: 100%;
   overflow-x: auto;
+  margin-top: 15px;
+  border-radius: 10px;
+  border: 1px solid #f0c5d9;
 }
 
-/* Botones de acciones */
+.tabla-expedientes table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  min-width: 1200px;
+}
+
+.tabla-expedientes th {
+  background-color: #d65791;
+  color: white;
+  padding: 14px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.tabla-expedientes td {
+  padding: 12px;
+  border-bottom: 1px solid #f3dbe6;
+  vertical-align: middle;
+}
+
+.tabla-expedientes tbody tr:nth-child(even) {
+  background-color: #fff5fa;
+}
+
+.tabla-expedientes tbody tr:hover {
+  background-color: #fce4f0;
+}
+
+/* Acciones */
 .acciones-expediente {
   display: flex;
   gap: 8px;
 }
 
-.acciones-expediente button {
-  padding: 8px 12px;
+/* Colores de estatus */
+.estatus {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: bold;
   white-space: nowrap;
 }
 
-/* Botón para eliminar */
-.contenedor-expedientes .boton-eliminar {
-  background-color: #b63b55;
+.estatus-abierto {
+  background-color: #ffd9df;
+  color: #a92d45;
 }
 
-.contenedor-expedientes .boton-eliminar:hover {
-  background-color: #922b42;
+.estatus-proceso {
+  background-color: #fff0b8;
+  color: #856000;
+}
+
+.estatus-cerrado {
+  background-color: #d5f3df;
+  color: #267044;
+}
+
+/* Adaptacion a pantallas pequeñas */
+@media (max-width: 600px) {
+  .contenedor-expedientes {
+    padding: 15px;
+  }
+
+  .formulario-expedientes {
+    padding: 15px;
+  }
+
+  .filtros-expedientes {
+    flex-direction: column;
+  }
+
+  .filtros-expedientes select {
+    width: 100%;
+  }
+}
+
+/* Columnas que se pueden ordenar */
+.columna-ordenable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.columna-ordenable:hover {
+  background-color: #b73577;
+}
+
+/* Paginacion */
+.paginacion-expedientes {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin-top: 25px;
+  margin-bottom: 25px;
+}
+
+.paginacion-expedientes button {
+  background-color: #d65791;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.paginacion-expedientes button:hover:not(:disabled) {
+  background-color: #b73577;
+}
+
+.paginacion-expedientes button:disabled {
+  background-color: #e8cbd9;
+  cursor: not-allowed;
+}
+
+.paginacion-expedientes span {
+  color: #82385c;
+  font-weight: bold;
 }
