@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from "react";
+import { tienePermiso } from "../utils/permisos";
 import "./Expedientes.css";
 
 const API = "http://localhost:4000/expedientes";
@@ -15,8 +16,22 @@ const formularioVacio = {
 };
 
 function Expedientes() {
+  // Obtener el usuario que inicio sesion
+  const usuarioGuardado = JSON.parse(
+    localStorage.getItem("sigoUsuario") || "null"
+  );
+
+  const rol = usuarioGuardado?.rol || "";
+
+  // Permisos de cada usuario
+  const puedeLeer = tienePermiso(rol, 4);
+  const puedeEditar = tienePermiso(rol, 2);
+  const puedeEliminar = tienePermiso(rol, 1);
+
   const [expedientes, setExpedientes] = useState([]);
-  const [formulario, setFormulario] = useState(formularioVacio);
+  const [formulario, setFormulario] = useState({
+    ...formularioVacio
+  });
   const [folioEditar, setFolioEditar] = useState(null);
 
   // Busqueda y filtros
@@ -34,6 +49,8 @@ function Expedientes() {
 
   // Consultar y buscar expedientes
   const cargarExpedientes = async (texto = "") => {
+    if (!puedeLeer) return;
+
     try {
       const direccion = texto.trim()
         ? `${API}/buscar?texto=${encodeURIComponent(texto)}`
@@ -60,7 +77,7 @@ function Expedientes() {
     }, 300);
 
     return () => clearTimeout(temporizador);
-  }, [textoBusqueda]);
+  }, [textoBusqueda, rol]);
 
   // Cambiar datos del formulario
   const cambiarDato = (e) => {
@@ -74,17 +91,28 @@ function Expedientes() {
   const guardarExpediente = async (e) => {
     e.preventDefault();
 
+    if (!puedeEditar) {
+      alert("No tienes permiso para guardar expedientes");
+      return;
+    }
+
     try {
       const respuesta = await fetch(
         folioEditar ? `${API}/${folioEditar}` : API,
         {
           method: folioEditar ? "PUT" : "POST",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "x-rol": rol
           },
           body: JSON.stringify(formulario)
         }
       );
+
+      if (respuesta.status === 403) {
+        alert("Acceso prohibido: no tienes permiso");
+        return;
+      }
 
       if (!respuesta.ok) {
         throw new Error("Error al guardar expediente");
@@ -108,6 +136,8 @@ function Expedientes() {
 
   // Editar expediente
   const editarExpediente = (expediente) => {
+    if (!puedeEditar) return;
+
     setFolioEditar(expediente.folio);
 
     setFormulario({
@@ -131,6 +161,11 @@ function Expedientes() {
 
   // Eliminar expediente
   const eliminarExpediente = async (folio) => {
+    if (!puedeEliminar) {
+      alert("No tienes permiso para eliminar expedientes");
+      return;
+    }
+
     const confirmar = window.confirm(
       `¿Deseas eliminar el expediente ${folio}?`
     );
@@ -139,8 +174,16 @@ function Expedientes() {
 
     try {
       const respuesta = await fetch(`${API}/${folio}`, {
-        method: "DELETE"
+        method: "DELETE",
+        headers: {
+          "x-rol": rol
+        }
       });
+
+      if (respuesta.status === 403) {
+        alert("Acceso prohibido: no puedes eliminar");
+        return;
+      }
 
       if (!respuesta.ok) {
         throw new Error("Error al eliminar expediente");
@@ -173,33 +216,38 @@ function Expedientes() {
   });
 
   // Ordenar expedientes
-  const expedientesOrdenados = [...expedientesFiltrados].sort((a, b) => {
-    let comparacion = 0;
+  const expedientesOrdenados = [...expedientesFiltrados].sort(
+    (a, b) => {
+      let comparacion = 0;
 
-    if (columnaOrden === "prioridad") {
-      const valoresPrioridad = {
-        Alta: 1,
-        Media: 2,
-        Baja: 3
-      };
+      if (columnaOrden === "prioridad") {
+        const valoresPrioridad = {
+          Alta: 1,
+          Media: 2,
+          Baja: 3
+        };
 
-      const prioridadA = valoresPrioridad[a.prioridad || "Media"];
-      const prioridadB = valoresPrioridad[b.prioridad || "Media"];
+        const prioridadA =
+          valoresPrioridad[a.prioridad || "Media"];
 
-      comparacion = prioridadA - prioridadB;
-    } else {
-      const valorA = String(a[columnaOrden] || "");
-      const valorB = String(b[columnaOrden] || "");
+        const prioridadB =
+          valoresPrioridad[b.prioridad || "Media"];
 
-      comparacion = valorA.localeCompare(valorB);
+        comparacion = prioridadA - prioridadB;
+      } else {
+        const valorA = String(a[columnaOrden] || "");
+        const valorB = String(b[columnaOrden] || "");
+
+        comparacion = valorA.localeCompare(valorB);
+      }
+
+      return direccionOrden === "asc"
+        ? comparacion
+        : -comparacion;
     }
+  );
 
-    return direccionOrden === "asc"
-      ? comparacion
-      : -comparacion;
-  });
-
-  // Cambiar el orden al hacer clic en una columna
+  // Cambiar orden de columnas
   const ordenarPor = (columna) => {
     if (columnaOrden === columna) {
       setDireccionOrden(
@@ -216,12 +264,15 @@ function Expedientes() {
   // Calcular paginacion
   const totalPaginas = Math.max(
     1,
-    Math.ceil(expedientesOrdenados.length / registrosPorPagina)
+    Math.ceil(
+      expedientesOrdenados.length / registrosPorPagina
+    )
   );
 
   const paginaSegura = Math.min(paginaActual, totalPaginas);
 
-  const indiceInicial = (paginaSegura - 1) * registrosPorPagina;
+  const indiceInicial =
+    (paginaSegura - 1) * registrosPorPagina;
 
   const expedientesPagina = expedientesOrdenados.slice(
     indiceInicial,
@@ -241,105 +292,121 @@ function Expedientes() {
     return fechaConvertida.toLocaleString("es-MX");
   };
 
+  if (!puedeLeer) {
+    return <p>No tienes permiso para consultar expedientes.</p>;
+  }
+
   return (
     <div className="contenedor-expedientes">
       <h1>Expedientes</h1>
       <p>Registro y consulta de expedientes en SIGO-GN</p>
 
-      <h2>
-        {folioEditar
-          ? `Editar expediente ${folioEditar}`
-          : "Registrar nuevo expediente"}
-      </h2>
+      <p>
+        <strong>Rol actual:</strong> {rol}
+      </p>
 
-      <form
-        className="formulario-expedientes"
-        onSubmit={guardarExpediente}
-      >
-        <label>Nombre del operativo</label>
-        <input
-          type="text"
-          name="nombreOperativo"
-          value={formulario.nombreOperativo}
-          onChange={cambiarDato}
-          required
-        />
-
-        <label>Tipo de incidente</label>
-        <input
-          type="text"
-          name="tipoIncidente"
-          value={formulario.tipoIncidente}
-          onChange={cambiarDato}
-          required
-        />
-
-        <label>Zona</label>
-        <input
-          type="text"
-          name="zona"
-          value={formulario.zona}
-          onChange={cambiarDato}
-          required
-        />
-
-        <label>Fecha del incidente</label>
-        <input
-          type="date"
-          name="fecha"
-          value={formulario.fecha}
-          onChange={cambiarDato}
-          required
-        />
-
-        <label>Descripción</label>
-        <textarea
-          name="descripcion"
-          value={formulario.descripcion}
-          onChange={cambiarDato}
-          required
-        />
-
-        <label>Estatus</label>
-        <select
-          name="estatus"
-          value={formulario.estatus}
-          onChange={cambiarDato}
-        >
-          <option value="Abierto">Abierto</option>
-          <option value="En proceso">En proceso</option>
-          <option value="Cerrado">Cerrado</option>
-        </select>
-
-        <label>Prioridad</label>
-        <select
-          name="prioridad"
-          value={formulario.prioridad}
-          onChange={cambiarDato}
-        >
-          <option value="Alta">Alta</option>
-          <option value="Media">Media</option>
-          <option value="Baja">Baja</option>
-        </select>
-
-        <div className="botones-formulario">
-          <button type="submit" className="boton-guardar">
+      {/* El formulario solo aparece si puede escribir */}
+      {puedeEditar && (
+        <>
+          <h2>
             {folioEditar
-              ? "Guardar cambios"
-              : "Registrar expediente"}
-          </button>
+              ? `Editar expediente ${folioEditar}`
+              : "Registrar nuevo expediente"}
+          </h2>
 
-          {folioEditar && (
-            <button
-              type="button"
-              className="boton-cancelar"
-              onClick={cancelarEdicion}
+          <form
+            className="formulario-expedientes"
+            onSubmit={guardarExpediente}
+          >
+            <label>Nombre del operativo</label>
+            <input
+              type="text"
+              name="nombreOperativo"
+              value={formulario.nombreOperativo}
+              onChange={cambiarDato}
+              required
+            />
+
+            <label>Tipo de incidente</label>
+            <input
+              type="text"
+              name="tipoIncidente"
+              value={formulario.tipoIncidente}
+              onChange={cambiarDato}
+              required
+            />
+
+            <label>Zona</label>
+            <input
+              type="text"
+              name="zona"
+              value={formulario.zona}
+              onChange={cambiarDato}
+              required
+            />
+
+            <label>Fecha del incidente</label>
+            <input
+              type="date"
+              name="fecha"
+              value={formulario.fecha}
+              onChange={cambiarDato}
+              required
+            />
+
+            <label>Descripción</label>
+            <textarea
+              name="descripcion"
+              value={formulario.descripcion}
+              onChange={cambiarDato}
+              required
+            />
+
+            <label>Estatus</label>
+            <select
+              name="estatus"
+              value={formulario.estatus}
+              onChange={cambiarDato}
             >
-              Cancelar
-            </button>
-          )}
-        </div>
-      </form>
+              <option value="Abierto">Abierto</option>
+              <option value="En proceso">En proceso</option>
+              <option value="Cerrado">Cerrado</option>
+            </select>
+
+            <label>Prioridad</label>
+            <select
+              name="prioridad"
+              value={formulario.prioridad}
+              onChange={cambiarDato}
+            >
+              <option value="Alta">Alta</option>
+              <option value="Media">Media</option>
+              <option value="Baja">Baja</option>
+            </select>
+
+            <div className="botones-formulario">
+              <button
+                type="submit"
+                className="boton-guardar"
+              >
+                {folioEditar
+                  ? "Guardar cambios"
+                  : "Registrar expediente"}
+              </button>
+
+              {folioEditar && (
+                <button
+                  type="button"
+                  className="boton-cancelar"
+                  onClick={cancelarEdicion}
+                >
+                  Cancelar
+                </button>
+              )}
+            </div>
+          </form>
+        </>
+      )}
 
       <h2>Expedientes registrados</h2>
 
@@ -428,7 +495,10 @@ function Expedientes() {
               </th>
 
               <th>Fecha de modificación</th>
-              <th>Acciones</th>
+
+              {(puedeEditar || puedeEliminar) && (
+                <th>Acciones</th>
+              )}
             </tr>
           </thead>
 
@@ -466,33 +536,43 @@ function Expedientes() {
                   {mostrarFecha(expediente.fechaModificacion)}
                 </td>
 
-                <td>
-                  <div className="acciones-expediente">
-                    <button
-                      type="button"
-                      className="boton-editar"
-                      onClick={() => editarExpediente(expediente)}
-                    >
-                      Editar
-                    </button>
+                {(puedeEditar || puedeEliminar) && (
+                  <td>
+                    <div className="acciones-expediente">
+                      {puedeEditar && (
+                        <button
+                          type="button"
+                          className="boton-editar"
+                          onClick={() =>
+                            editarExpediente(expediente)
+                          }
+                        >
+                          Editar
+                        </button>
+                      )}
 
-                    <button
-                      type="button"
-                      className="boton-eliminar"
-                      onClick={() =>
-                        eliminarExpediente(expediente.folio)
-                      }
-                    >
-                      Eliminar
-                    </button>
-                  </div>
-                </td>
+                      {puedeEliminar && (
+                        <button
+                          type="button"
+                          className="boton-eliminar"
+                          onClick={() =>
+                            eliminarExpediente(expediente.folio)
+                          }
+                        >
+                          Eliminar
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                )}
               </tr>
             ))}
 
             {expedientesPagina.length === 0 && (
               <tr>
-                <td colSpan="11">
+                <td colSpan={
+                  puedeEditar || puedeEliminar ? 11 : 10
+                }>
                   No se encontraron expedientes.
                 </td>
               </tr>
@@ -506,7 +586,9 @@ function Expedientes() {
         <button
           type="button"
           disabled={paginaSegura === 1}
-          onClick={() => setPaginaActual(paginaSegura - 1)}
+          onClick={() =>
+            setPaginaActual(paginaSegura - 1)
+          }
         >
           Anterior
         </button>
@@ -518,7 +600,9 @@ function Expedientes() {
         <button
           type="button"
           disabled={paginaSegura === totalPaginas}
-          onClick={() => setPaginaActual(paginaSegura + 1)}
+          onClick={() =>
+            setPaginaActual(paginaSegura + 1)
+          }
         >
           Siguiente
         </button>
