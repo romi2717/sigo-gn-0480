@@ -4,7 +4,7 @@ const usuarios = [
     usuario: "Oficial1",
     contraseña: "2717",
     nombre: "Romina Rico",
-    rol: "Oficial"
+    rol: "Comandante"
   },
   {
     usuario: "Oficial2",
@@ -16,7 +16,7 @@ const usuarios = [
     usuario: "Oficial3",
     contraseña: "3452",
     nombre: "Karla Mendieta",
-    rol: "Oficial"
+    rol: "Analista"
   }
 ];
 
